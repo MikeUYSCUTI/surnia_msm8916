@@ -39,7 +39,7 @@ static int gc_thread_func(void *data)
 						msecs_to_jiffies(wait_ms));
 		if (kthread_should_stop())
 			break;
-		if (sbi->sb->s_frozen >= SB_FREEZE_WRITE) {
+		if (sbi->sb->s_writers.frozen >= SB_FREEZE_WRITE) {
 			increase_sleep_time(gc_th, &wait_ms);
 			continue;
 		}
@@ -371,18 +371,15 @@ static int gc_node_segment(struct f2fs_sb_info *sbi,
 	block_t start_addr;
 	int off;
 	start_addr = START_BLOCK(sbi, segno);
-
 next_step:
 	entry = sum;
+	for (off = 0; off < sbi->blocks_per_seg; off++, entry++) {
+		nid_t nid = le32_to_cpu(entry->nid);
+		struct page *node_page;
+		struct node_info ni;
 		/* stop BG_GC if there is not enough free sections. */
 		if (gc_type == BG_GC && has_not_enough_free_secs(sbi, 0))
 			return 0;
-		if (check_valid_map(sbi, segno, off) == 0)
-			continue;
-		/* stop BG_GC if there is not enough free sections. */
-		if (gc_type == BG_GC && has_not_enough_free_secs(sbi, 0))
-			return 0;
-
 		if (check_valid_map(sbi, segno, off) == 0)
 			continue;
 		if (initial) {
@@ -430,6 +427,8 @@ next_step:
 	}
 	return 0;
 }
+
+
 /*
  * Calculate start block index indicating the given node offset.
  * Be careful, caller should give this node offset only indicating direct node
@@ -604,7 +603,6 @@ static int gc_data_segment(struct f2fs_sb_info *sbi, struct f2fs_summary *sum,
 	int off;
 	int phase = 0;
 	start_addr = START_BLOCK(sbi, segno);
-
 next_step:
 	entry = sum;
 	for (off = 0; off < sbi->blocks_per_seg; off++, entry++) {
@@ -616,14 +614,12 @@ next_step:
 		/* stop BG_GC if there is not enough free sections. */
 		if (gc_type == BG_GC && has_not_enough_free_secs(sbi, 0))
 			return 0;
-
 		if (check_valid_map(sbi, segno, off) == 0)
 			continue;
 		if (phase == 0) {
 			ra_node_page(sbi, le32_to_cpu(entry->nid));
 			continue;
 		}
-
 		/* Get an inode by ino with checking validity */
 		if (!is_alive(sbi, entry, &dni, start_addr + off, &nofs))
 			continue;
@@ -631,7 +627,6 @@ next_step:
 			ra_node_page(sbi, dni.ino);
 			continue;
 		}
-
 		ofs_in_node = le16_to_cpu(entry->ofs_in_node);
 		if (phase == 2) {
 			inode = f2fs_iget(sb, dni.ino);
@@ -642,6 +637,7 @@ next_step:
 						S_ISREG(inode->i_mode)) {
 				add_gc_inode(gc_list, inode);
 				continue;
+			}
 			start_bidx = start_bidx_of_node(nofs, F2FS_I(inode));
 			data_page = get_read_data_page(inode,
 					start_bidx + ofs_in_node, READA, true);
@@ -667,10 +663,8 @@ next_step:
 	}
 	if (++phase < 4)
 		goto next_step;
-
 	if (gc_type == FG_GC) {
 		f2fs_submit_merged_bio(sbi, DATA, WRITE);
-
 		/* return 1 only if FG_GC succefully reclaimed one */
 		if (get_valid_blocks(sbi, segno, 1) == 0)
 			return 1;
@@ -697,9 +691,7 @@ static int do_garbage_collect(struct f2fs_sb_info *sbi, unsigned int segno,
 	int nfree = 0;
 	/* read segment summary of victim */
 	sum_page = get_sum_page(sbi, segno);
-
 	blk_start_plug(&plug);
-
 	sum = page_address(sum_page);
 	/*
 	 * this is to avoid deadlock:
@@ -721,12 +713,9 @@ static int do_garbage_collect(struct f2fs_sb_info *sbi, unsigned int segno,
 	blk_finish_plug(&plug);
 	stat_inc_seg_count(sbi, GET_SUM_TYPE((&sum->footer)), gc_type);
 	stat_inc_call_count(sbi->stat_info);
-
 	f2fs_put_page(sum_page, 0);
 	return nfree;
 }
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 int f2fs_gc(struct f2fs_sb_info *sbi, bool sync)
 {
 	unsigned int segno, i;
@@ -738,7 +727,6 @@ int f2fs_gc(struct f2fs_sb_info *sbi, bool sync)
 		.ilist = LIST_HEAD_INIT(gc_list.ilist),
 		.iroot = RADIX_TREE_INIT(GFP_NOFS),
 	};
-
 	cpc.reason = __get_cp_reason(sbi);
 gc_more:
 	segno = NULL_SEGNO;
@@ -767,13 +755,10 @@ gc_more:
 				gc_type == FG_GC)
 			break;
 	}
-
 	if (i == sbi->segs_per_sec && gc_type == FG_GC)
 		sec_freed++;
-
 	if (gc_type == FG_GC)
 		sbi->cur_victim_sec = NULL_SEGNO;
-
 	if (!sync) {
 		if (has_not_enough_free_secs(sbi, sec_freed))
 			goto gc_more;

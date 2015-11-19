@@ -564,10 +564,6 @@ static inline unsigned short curseg_blkoff(struct f2fs_sb_info *sbi, int type)
 	struct curseg_info *curseg = CURSEG_I(sbi, type);
 	return curseg->next_blkoff;
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 static inline void check_seg_range(struct f2fs_sb_info *sbi, unsigned int segno)
 {
 	f2fs_bug_on(sbi, segno > TOTAL_SEGS(sbi) - 1);

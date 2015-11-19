@@ -245,10 +245,7 @@ bool need_inode_block_update(struct f2fs_sb_info *sbi, nid_t ino)
 static struct nat_entry *grab_nat_entry(struct f2fs_nm_info *nm_i, nid_t nid)
 {
 	struct nat_entry *new;
-<<<<<<< HEAD
-=======
 
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	new = f2fs_kmem_cache_alloc(nat_entry_slab, GFP_NOFS);
 	f2fs_radix_tree_insert(&nm_i->nat_root, nid, new);
 	memset(new, 0, sizeof(struct nat_entry));
@@ -336,10 +333,6 @@ int try_to_free_nats(struct f2fs_sb_info *sbi, int nr_shrink)
 {
 	struct f2fs_nm_info *nm_i = NM_I(sbi);
 	int nr = nr_shrink;
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	if (!down_write_trylock(&nm_i->nat_tree_lock))
 		return 0;
 
@@ -1535,10 +1528,6 @@ static void build_free_nids(struct f2fs_sb_info *sbi)
 	/* Enough entries */
 	if (nm_i->fcnt > NAT_ENTRY_PER_BLOCK)
 		return;
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	/* readahead nat pages to be scanned */
 	ra_meta_pages(sbi, NAT_BLOCK_OFFSET(nid), FREE_NID_PAGES,
 							META_NAT, true);

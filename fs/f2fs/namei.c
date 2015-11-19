@@ -225,10 +225,6 @@ static int __recover_dot_dentries(struct inode *dir, nid_t pino)
 		if (err)
 			goto out;
 	}
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	de = f2fs_find_entry(dir, &dotdot, &page);
 	if (de) {
 		f2fs_dentry_kunmap(dir, page);
@@ -257,10 +253,6 @@ static struct dentry *f2fs_lookup(struct inode *dir, struct dentry *dentry,
 
 	if (dentry->d_name.len > F2FS_NAME_LEN)
 		return ERR_PTR(-ENAMETOOLONG);
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	de = f2fs_find_entry(dir, &dentry->d_name, &page);
 	if (!de)
 		return d_splice_alias(inode, dentry);

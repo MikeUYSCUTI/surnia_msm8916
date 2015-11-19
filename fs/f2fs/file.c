@@ -42,7 +42,7 @@ static int f2fs_vm_page_mkwrite(struct vm_area_struct *vma,
 
 	f2fs_balance_fs(sbi);
 
-	vfs_check_frozen(inode->i_sb, SB_FREEZE_WRITE);
+    //vfs_check_frozen(inode->i_sb, SB_FREEZE_WRITE);
 
 	f2fs_bug_on(sbi, f2fs_has_inline_data(inode));
 
@@ -421,7 +421,7 @@ static loff_t f2fs_llseek(struct file *file, loff_t offset, int whence)
 	case SEEK_CUR:
 	case SEEK_END:
 		return generic_file_llseek_size(file, offset, whence,
-						maxbytes);
+						maxbytes, i_size_read(inode));
 	case SEEK_DATA:
 	case SEEK_HOLE:
 		if (offset < 0)

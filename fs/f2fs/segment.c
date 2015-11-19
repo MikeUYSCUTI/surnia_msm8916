@@ -43,10 +43,6 @@ static unsigned long __reverse_ulong(unsigned char *str)
 	}
 	return tmp;
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 /**
  * Copied from latest lib/llist.c
  * llist_for_each_entry_safe - iterate over some deleted entries of
@@ -105,10 +101,6 @@ struct llist_node *llist_reverse_order(struct llist_node *head)
  */
 #define list_last_entry(ptr, type, member) \
 	list_entry((ptr)->prev, type, member)
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 /*
  * __reverse_ffs is copied from include/asm-generic/bitops/__ffs.h since
  * MSB and LSB are reversed in a byte by f2fs_set_bit.
@@ -132,26 +124,14 @@ static inline unsigned long __reverse_ffs(unsigned long word)
 		num += 8;
 	else
 		word >>= 8;
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	if ((word & 0xf0) == 0)
 		num += 4;
 	else
 		word >>= 4;
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	if ((word & 0xc) == 0)
 		num += 2;
 	else
 		word >>= 2;
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	if ((word & 0x2) == 0)
 		num += 1;
 	return num;
@@ -171,10 +151,6 @@ static unsigned long __find_rev_next_bit(const unsigned long *addr,
 	const unsigned long *p = addr + BIT_WORD(offset);
 	unsigned long result = offset & ~(BITS_PER_LONG - 1);
 	unsigned long tmp;
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	if (offset >= size)
 		return size;
 
@@ -182,10 +158,6 @@ static unsigned long __find_rev_next_bit(const unsigned long *addr,
 	offset %= BITS_PER_LONG;
 	if (!offset)
 		goto aligned;
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	tmp = __reverse_ulong((unsigned char *)p);
 	tmp &= ~0UL >> offset;
 
@@ -232,10 +204,6 @@ static unsigned long __find_rev_next_zero_bit(const unsigned long *addr,
 	offset %= BITS_PER_LONG;
 	if (!offset)
 		goto aligned;
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	tmp = __reverse_ulong((unsigned char *)p);
 	tmp |= ~((~0UL << offset) >> offset);
 
@@ -272,10 +240,6 @@ void register_inmem_page(struct inode *inode, struct page *page)
 {
 	struct f2fs_inode_info *fi = F2FS_I(inode);
 	struct inmem_pages *new;
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	f2fs_trace_pid(page);
 
 	set_page_private(page, (unsigned long)ATOMIC_WRITTEN_PAGE);
@@ -286,10 +250,6 @@ void register_inmem_page(struct inode *inode, struct page *page)
 	/* add atomic page indices to the list */
 	new->page = page;
 	INIT_LIST_HEAD(&new->list);
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	/* increase reference count with clean state */
 	mutex_lock(&fi->inmem_lock);
 	get_page(page);
@@ -376,10 +336,6 @@ void f2fs_balance_fs(struct f2fs_sb_info *sbi)
 	 * We should do GC or end up with checkpoint, if there are so many dirty
 	 * dir/node pages without enough free segments.
 	 */
-<<<<<<< HEAD
-
-=======
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	if (has_not_enough_free_secs(sbi, 0)) {
 		mutex_lock(&sbi->gc_mutex);
 		f2fs_gc(sbi, false);
@@ -433,10 +389,6 @@ static int __submit_bio_wait(int rw, struct bio *bio)
 
 	return ret.error;
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 static int issue_flush_thread(void *data)
 {
 	struct f2fs_sb_info *sbi = data;
@@ -458,10 +410,6 @@ repeat:
 
 		bio->bi_bdev = sbi->sb->s_bdev;
 		ret = __submit_bio_wait(WRITE_FLUSH, bio);
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 		llist_for_each_entry_safe(cmd, next,
 					  fcc->dispatch_list, llnode) {
 			cmd->ret = ret;
@@ -653,10 +601,6 @@ bool discard_next_dnode(struct f2fs_sb_info *sbi, block_t blkaddr)
 
 		err = f2fs_issue_discard(sbi, blkaddr, 1);
 	}
-<<<<<<< HEAD
-=======
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	if (err) {
 		update_meta_page(sbi, NULL, blkaddr);
 		return true;
@@ -1570,13 +1514,7 @@ static inline bool is_merged_page(struct f2fs_sb_info *sbi,
 		up_read(&io->io_rwsem);
 		return false;
 	}
-<<<<<<< HEAD
 	__bio_for_each_segment(bvec, io->bio, i, 0) {
-=======
-
-	__bio_for_each_segment(bvec, io->bio, i, 0) {
-
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 		if (bvec->bv_page->mapping) {
 			target = bvec->bv_page;
 		} else {
@@ -1930,12 +1868,8 @@ static struct page *get_next_sit_page(struct f2fs_sb_info *sbi,
 
 static struct sit_entry_set *grab_sit_entry_set(void)
 {
-<<<<<<< HEAD
-	struct sit_entry_set *ses = f2fs_kmem_cache_alloc(sit_entry_set_slab, GFP_NOFS);
-=======
 	struct sit_entry_set *ses =
 			f2fs_kmem_cache_alloc(sit_entry_set_slab, GFP_NOFS);
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 
 	ses->entry_cnt = 0;
 	INIT_LIST_HEAD(&ses->set_list);

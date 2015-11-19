@@ -522,11 +522,7 @@ int recover_orphan_inodes(struct f2fs_sb_info *sbi)
 
 	start_blk = __start_cp_addr(sbi) + 1 + __cp_payload(sbi);
 	orphan_blocks = __start_sum_addr(sbi) - 1 - __cp_payload(sbi);
-<<<<<<< HEAD
-=======
 
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
-	ra_meta_pages(sbi, start_blk, orphan_blocks, META_CP, true);
 
 	for (i = 0; i < orphan_blocks; i++) {
 		struct page *page = get_meta_page(sbi, start_blk + i);
@@ -545,10 +541,6 @@ int recover_orphan_inodes(struct f2fs_sb_info *sbi)
 	}
 	/* clear Orphan Flag */
 	clear_ckpt_flags(F2FS_CKPT(sbi), CP_ORPHAN_PRESENT_FLAG);
-<<<<<<< HEAD
-
-=======
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	return 0;
 }
 
@@ -1080,11 +1072,6 @@ static void do_checkpoint(struct f2fs_sb_info *sbi, struct cp_control *cpc)
 
 	/* wait for previous submitted meta pages writeback */
 	wait_on_all_pages_writeback(sbi);
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	/*
 	 * invalidate meta page which is used temporarily for zeroing out
 	 * block at the end of warm node chain.

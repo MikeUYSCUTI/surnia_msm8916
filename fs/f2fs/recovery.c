@@ -179,10 +179,7 @@ static int find_fsync_dnodes(struct f2fs_sb_info *sbi, struct list_head *head)
 	/* get node pages in the current segment */
 	curseg = CURSEG_I(sbi, CURSEG_WARM_NODE);
 	blkaddr = NEXT_FREE_BLKADDR(sbi, curseg);
-<<<<<<< HEAD
-=======
 
->>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	ra_meta_pages(sbi, blkaddr, 1, META_POR, true);
 
 	while (1) {
