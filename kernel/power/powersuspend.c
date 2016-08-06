@@ -105,10 +105,47 @@ abort:
 	mutex_unlock(&power_suspend_lock);
 }
 
-static void set_power_suspend_state(int new_state)
+
+#ifdef CONFIG_ADRENO_IDLER
+bool power_suspended = false;
+#endif
+
+void set_power_suspend_state(int new_state)
 {
 	unsigned long irqflags;
-	int old_sleep;
+	if (state != new_state) {
+		spin_lock_irqsave(&state_lock, irqflags);
+		if (state == POWER_SUSPEND_INACTIVE && new_state == POWER_SUSPEND_ACTIVE) {
+			#ifdef CONFIG_POWERSUSPEND_DEBUG
+			pr_info("[POWERSUSPEND] state activated.\n");
+			#endif
+
+			#ifdef CONFIG_ADRENO_IDLER
+			power_suspended = true;
+			#endif
+
+			state = new_state;
+			queue_work(suspend_work_queue, &power_suspend_work);
+		} else if (state == POWER_SUSPEND_ACTIVE && new_state == POWER_SUSPEND_INACTIVE) {
+			#ifdef CONFIG_POWERSUSPEND_DEBUG
+			pr_info("[POWERSUSPEND] state deactivated.\n");
+			#endif
+
+			#ifdef CONFIG_ADRENO_IDLER
+			power_suspended = false;
+			#endif	
+
+			state = new_state;
+			queue_work(suspend_work_queue, &power_resume_work);
+		}
+		spin_unlock_irqrestore(&state_lock, irqflags);
+	#ifdef CONFIG_POWERSUSPEND_DEBUG
+	} else {
+		pr_info("[POWERSUSPEND] state change requested, but unchanged ?! Ignored !\n");
+	#endif
+	}
+}
+
 
 	spin_lock_irqsave(&state_lock, irqflags);
 	old_sleep = state;
