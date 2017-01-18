@@ -243,7 +243,10 @@ void kcal_ext_apply_values(int red, int green, int blue)
 	lut_data->green = green / 128;
 	lut_data->blue = blue / 128;
 
-	kcal_apply_values(lut_data);
+	if (mdss_mdp_kcal_is_panel_on())
+		mdss_mdp_kcal_update_pcc(lut_data);
+	else
+		lut_data->queue_changes = true;
 }
 
 struct kcal_lut_data kcal_ext_show_values(void)
