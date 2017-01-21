@@ -9,7 +9,6 @@
  * published by the Free Software Foundation.
  */
 #include <linux/fs.h>
-#include <linux/namei.h>
 #include <linux/f2fs_fs.h>
 #include "f2fs.h"
 #include "node.h"
@@ -90,7 +89,6 @@ static struct f2fs_dir_entry *find_in_block(struct page *dentry_page,
 	dentry_blk = (struct f2fs_dentry_block *)kmap(dentry_page);
 
 	make_dentry_ptr(NULL, &d, (void *)dentry_blk, 1);
-
 	de = find_target_dentry(fname, namehash, max_slots, &d);
 	if (de)
 		*res_page = dentry_page;
@@ -107,7 +105,6 @@ static struct f2fs_dir_entry *find_in_block(struct page *dentry_page,
 
 struct f2fs_dir_entry *find_target_dentry(struct f2fs_filename *fname,
 			f2fs_hash_t namehash, int *max_slots,
-
 			struct f2fs_dentry_ptr *d)
 {
 	struct f2fs_dir_entry *de;
@@ -137,10 +134,8 @@ struct f2fs_dir_entry *find_target_dentry(struct f2fs_filename *fname,
 				goto found;
 		} else if (de_name.len == name->len &&
 			de->hash_code == namehash &&
-			!memcmp(de_name.name, name->name, name->len)) {
+			!memcmp(de_name.name, name->name, name->len))
 			goto found;
-
-		}
 
 		if (max_slots && max_len > *max_slots)
 			*max_slots = max_len;
@@ -193,10 +188,8 @@ static struct f2fs_dir_entry *find_in_level(struct inode *dir,
 			room = true;
 			continue;
 		}
-
 		de = find_in_block(dentry_page, fname, namehash, &max_slots,
-
-							res_page);
+								res_page);
 		if (de)
 			break;
 
@@ -219,9 +212,8 @@ static struct f2fs_dir_entry *find_in_level(struct inode *dir,
  * and the entry itself. Page is returned mapped and unlocked.
  * Entry is guaranteed to be valid.
  */
-struct f2fs_dir_entry *f2fs_find_entry(struct inode *dir, struct qstr *child,
-
-		struct page **res_page)
+struct f2fs_dir_entry *f2fs_find_entry(struct inode *dir,
+			struct qstr *child, struct page **res_page)
 {
 	unsigned long npages = dir_blocks(dir);
 	struct f2fs_dir_entry *de = NULL;
@@ -237,7 +229,6 @@ struct f2fs_dir_entry *f2fs_find_entry(struct inode *dir, struct qstr *child,
 		return NULL;
 
 	if (f2fs_has_inline_dentry(dir)) {
-
 		de = find_in_inline_dir(dir, &fname, res_page);
 		goto out;
 	}
@@ -802,6 +793,7 @@ bool f2fs_fill_dentries(struct file *file, void *dirent, filldir_t filldir,
 		if (f2fs_encrypted_inode(d->inode)) {
 			int save_len = fstr->len;
 			int ret;
+
 			de_name.name = kmalloc(de_name.len, GFP_NOFS);
 			if (!de_name.name)
 				return false;
@@ -870,7 +862,6 @@ static int f2fs_readdir(struct file *file, void *dirent, filldir_t filldir)
 				min(npages - n, (pgoff_t)MAX_DIR_RA_PAGES));
 
 	for (; n < npages; n++) {
-
 		dentry_page = get_lock_data_page(inode, n, false);
 		if (IS_ERR(dentry_page))
 			continue;

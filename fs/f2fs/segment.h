@@ -527,7 +527,6 @@ static inline bool need_inplace_update(struct inode *inode)
 		return false;
 
 	if (policy & (0x1 << F2FS_IPU_FORCE))
-
 		return true;
 	if (policy & (0x1 << F2FS_IPU_SSR) && need_SSR(sbi))
 		return true;
@@ -565,11 +564,12 @@ static inline unsigned short curseg_blkoff(struct f2fs_sb_info *sbi, int type)
 	struct curseg_info *curseg = CURSEG_I(sbi, type);
 	return curseg->next_blkoff;
 }
+<<<<<<< HEAD
+=======
 
-#ifdef CONFIG_F2FS_CHECK_FS
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 static inline void check_seg_range(struct f2fs_sb_info *sbi, unsigned int segno)
 {
-
 	f2fs_bug_on(sbi, segno > TOTAL_SEGS(sbi) - 1);
 }
 
@@ -585,7 +585,6 @@ static inline void verify_block_addr(struct f2fs_sb_info *sbi, block_t blk_addr)
 static inline void check_block_count(struct f2fs_sb_info *sbi,
 		int segno, struct f2fs_sit_entry *raw_sit)
 {
-
 #ifdef CONFIG_F2FS_CHECK_FS
 	bool is_valid  = test_bit_le(0, raw_sit->valid_map) ? true : false;
 	int valid_blocks = 0;
@@ -611,34 +610,6 @@ static inline void check_block_count(struct f2fs_sb_info *sbi,
 	f2fs_bug_on(sbi, GET_SIT_VBLOCKS(raw_sit) > sbi->blocks_per_seg
 					|| segno > TOTAL_SEGS(sbi) - 1);
 }
-#else
-static inline void check_seg_range(struct f2fs_sb_info *sbi, unsigned int segno)
-{
-	if (segno > TOTAL_SEGS(sbi) - 1)
-		set_sbi_flag(sbi, SBI_NEED_FSCK);
-}
-
-static inline void verify_block_addr(struct f2fs_sb_info *sbi, block_t blk_addr)
-{
-	if (blk_addr < SEG0_BLKADDR(sbi) || blk_addr >= MAX_BLKADDR(sbi))
-		set_sbi_flag(sbi, SBI_NEED_FSCK);
-}
-
-/*
- * Summary block is always treated as an invalid block
- */
-static inline void check_block_count(struct f2fs_sb_info *sbi,
-		int segno, struct f2fs_sit_entry *raw_sit)
-{
-	/* check segment usage */
-	if (GET_SIT_VBLOCKS(raw_sit) > sbi->blocks_per_seg)
-		set_sbi_flag(sbi, SBI_NEED_FSCK);
-
-	/* check boundary of a given segment number */
-	if (segno > TOTAL_SEGS(sbi) - 1)
-		set_sbi_flag(sbi, SBI_NEED_FSCK);
-}
-#endif
 
 static inline pgoff_t current_sit_addr(struct f2fs_sb_info *sbi,
 						unsigned int start)

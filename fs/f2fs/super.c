@@ -212,7 +212,6 @@ F2FS_RW_ATTR(SM_INFO, f2fs_sm_info, ipu_policy, ipu_policy);
 F2FS_RW_ATTR(SM_INFO, f2fs_sm_info, min_ipu_util, min_ipu_util);
 F2FS_RW_ATTR(SM_INFO, f2fs_sm_info, min_fsync_blocks, min_fsync_blocks);
 F2FS_RW_ATTR(NM_INFO, f2fs_nm_info, ram_thresh, ram_thresh);
-
 F2FS_RW_ATTR(NM_INFO, f2fs_nm_info, ra_nid_pages, ra_nid_pages);
 F2FS_RW_ATTR(F2FS_SBI, f2fs_sb_info, max_victim_search, max_victim_search);
 F2FS_RW_ATTR(F2FS_SBI, f2fs_sb_info, dir_level, dir_level);
@@ -233,7 +232,6 @@ static struct attribute *f2fs_attrs[] = {
 	ATTR_LIST(max_victim_search),
 	ATTR_LIST(dir_level),
 	ATTR_LIST(ram_thresh),
-
 	ATTR_LIST(ra_nid_pages),
 	ATTR_LIST(cp_interval),
 	NULL,
@@ -401,7 +399,6 @@ static int parse_options(struct super_block *sb, char *options)
 		case Opt_extent_cache:
 			set_opt(sbi, EXTENT_CACHE);
 			break;
-
 		case Opt_noextent_cache:
 			clear_opt(sbi, EXTENT_CACHE);
 			break;
@@ -433,7 +430,6 @@ static struct inode *f2fs_alloc_inode(struct super_block *sb)
 	atomic_set(&fi->dirty_pages, 0);
 	fi->i_current_depth = 1;
 	fi->i_advise = 0;
-
 	init_rwsem(&fi->i_sem);
 	INIT_LIST_HEAD(&fi->inmem_pages);
 	mutex_init(&fi->inmem_lock);
@@ -470,16 +466,10 @@ static int f2fs_drop_inode(struct inode *inode)
 			/* some remained atomic pages should discarded */
 			if (f2fs_is_atomic_file(inode))
 				commit_inmem_pages(inode, true);
-			/* should remain fi->extent_tree for writepage */
-			f2fs_destroy_extent_node(inode);
-
-			sb_start_intwrite(inode->i_sb);
 			i_size_write(inode, 0);
 
 			if (F2FS_HAS_BLOCKS(inode))
 				f2fs_truncate(inode, true);
-
-			sb_end_intwrite(inode->i_sb);
 
 #ifdef CONFIG_F2FS_FS_ENCRYPTION
 			if (F2FS_I(inode)->i_crypt_info)
@@ -487,7 +477,6 @@ static int f2fs_drop_inode(struct inode *inode)
 					F2FS_I(inode)->i_crypt_info);
 #endif
 			spin_lock(&inode->i_lock);
-
 			atomic_dec(&inode->i_count);
 		}
 		return 0;
@@ -529,7 +518,6 @@ static void f2fs_put_super(struct super_block *sb)
 
 	/* prevent remaining shrinker jobs */
 	mutex_lock(&sbi->umount_mutex);
-
 	/*
 	 * We don't need to do checkpoint when superblock is clean.
 	 * But, the previous checkpoint was not done by umount, it needs to do
@@ -544,7 +532,6 @@ static void f2fs_put_super(struct super_block *sb)
 	}
 	/* write_checkpoint can update stat informaion */
 	f2fs_destroy_stats(sbi);
-
 	/*
 	 * normally superblock is clean, so we need to release this.
 	 * In addition, EIO will skip do checkpoint, we need this as well.
@@ -553,7 +540,6 @@ static void f2fs_put_super(struct super_block *sb)
 	release_discard_addrs(sbi);
 	f2fs_leave_shrinker(sbi);
 	mutex_unlock(&sbi->umount_mutex);
-
 	iput(sbi->node_inode);
 	iput(sbi->meta_inode);
 
@@ -639,7 +625,6 @@ static int f2fs_statfs(struct dentry *dentry, struct kstatfs *buf)
 static int f2fs_show_options(struct seq_file *seq, struct dentry *root)
 {
 	struct f2fs_sb_info *sbi = F2FS_SB(root->d_sb);
-
 	if (!f2fs_readonly(sbi->sb) && test_opt(sbi, BG_GC)) {
 		if (test_opt(sbi, FORCE_FG_GC))
 			seq_printf(seq, ",background_gc=%s", "sync");
@@ -684,7 +669,6 @@ static int f2fs_show_options(struct seq_file *seq, struct dentry *root)
 		seq_puts(seq, ",fastboot");
 	if (test_opt(sbi, EXTENT_CACHE))
 		seq_puts(seq, ",extent_cache");
-
 	else
 		seq_puts(seq, ",noextent_cache");
 	seq_printf(seq, ",active_logs=%u", sbi->active_logs);
@@ -721,7 +705,7 @@ static int segment_info_seq_show(struct seq_file *seq, void *offset)
 
 static int segment_info_open_fs(struct inode *inode, struct file *file)
 {
-	return single_open(file, segment_info_seq_show, PDE_DATA(inode));
+	return single_open(file, segment_info_seq_show, PDE(inode)->data);
 }
 
 static const struct file_operations f2fs_seq_segment_info_fops = {
@@ -740,7 +724,6 @@ static void default_options(struct f2fs_sb_info *sbi)
 	set_opt(sbi, BG_GC);
 	set_opt(sbi, INLINE_DATA);
 	set_opt(sbi, EXTENT_CACHE);
-
 #ifdef CONFIG_F2FS_FS_XATTR
 	set_opt(sbi, XATTR_USER);
 #endif
@@ -781,8 +764,6 @@ static int f2fs_remount(struct super_block *sb, int *flags, char *data)
 	 */
 	if (f2fs_readonly(sb) && (*flags & MS_RDONLY))
 		goto skip;
-
-
 	/* disallow enable/disable extent_cache dynamically */
 	if (no_extent_cache == !!test_opt(sbi, EXTENT_CACHE)) {
 		err = -EINVAL;
@@ -790,7 +771,6 @@ static int f2fs_remount(struct super_block *sb, int *flags, char *data)
 				"switch extent_cache option is not allowed");
 		goto restore_opts;
 	}
-
 	/*
 	 * We stop the GC thread if FS is mounted as RO
 	 * or if background_gc = off is passed in mount
@@ -900,26 +880,6 @@ static const struct export_operations f2fs_export_ops = {
 	.get_parent = f2fs_get_parent,
 };
 
-
-static loff_t max_file_blocks(void)
-{
-	loff_t result = (DEF_ADDRS_PER_INODE - F2FS_INLINE_XATTR_ADDRS);
-	loff_t leaf_count = ADDRS_PER_BLOCK;
-
-	/* two direct node blocks */
-	result += (leaf_count * 2);
-
-	/* two indirect node blocks */
-	leaf_count *= NIDS_PER_BLOCK;
-	result += (leaf_count * 2);
-
-	/* one double indirect node block */
-	leaf_count *= NIDS_PER_BLOCK;
-	result += leaf_count;
-
-	return result;
-}
-
 static loff_t max_file_size(unsigned bits)
 {
 	loff_t result = (DEF_ADDRS_PER_INODE - F2FS_INLINE_XATTR_ADDRS);
@@ -935,7 +895,7 @@ static loff_t max_file_size(unsigned bits)
 	/* one double indirect node block */
 	leaf_count *= NIDS_PER_BLOCK;
 	result += leaf_count;
-
+	result <<= bits;
 	return result;
 }
 
@@ -1186,10 +1146,7 @@ try_onemore:
 	err = parse_options(sb, options);
 	if (err)
 		goto free_options;
-
-	sbi->max_file_blocks = max_file_blocks();
-	sb->s_maxbytes = sbi->max_file_blocks <<
-				le32_to_cpu(raw_super->log_blocksize);
+	sb->s_maxbytes = max_file_size(le32_to_cpu(raw_super->log_blocksize));
 	sb->s_max_links = F2FS_LINK_MAX;
 	get_random_bytes(&sbi->s_next_generation, sizeof(u32));
 
@@ -1210,8 +1167,6 @@ try_onemore:
 	mutex_init(&sbi->writepages);
 	mutex_init(&sbi->cp_mutex);
 	init_rwsem(&sbi->node_write);
-
-
 	/* disallow all the data/node/meta page writes */
 	set_sbi_flag(sbi, SBI_POR_DOING);
 	spin_lock_init(&sbi->stat_lock);
@@ -1289,7 +1244,6 @@ try_onemore:
 		err = PTR_ERR(sbi->node_inode);
 		goto free_nm;
 	}
-
 	f2fs_join_shrinker(sbi);
 
 	/* if there are nt orphan nodes free them */
@@ -1443,7 +1397,6 @@ static struct file_system_type f2fs_fs_type = {
 	.kill_sb	= kill_f2fs_super,
 	.fs_flags	= FS_REQUIRES_DEV,
 };
-MODULE_ALIAS_FS("f2fs");
 
 static int __init init_inodecache(void)
 {
@@ -1494,7 +1447,6 @@ static int __init init_f2fs_fs(void)
 	if (err)
 		goto free_kset;
 
-
 	register_shrinker(&f2fs_shrinker_info);
 
 	err = register_filesystem(&f2fs_fs_type);
@@ -1526,8 +1478,6 @@ static void __exit exit_f2fs_fs(void)
 {
 	remove_proc_entry("fs/f2fs", NULL);
 	f2fs_destroy_root_stats();
-	unregister_shrinker(&f2fs_shrinker_info);
-	unregister_filesystem(&f2fs_fs_type);
 	f2fs_exit_crypto();
 	destroy_extent_cache();
 	destroy_checkpoint_caches();

@@ -29,6 +29,24 @@ static struct kmem_cache *discard_entry_slab;
 static struct kmem_cache *sit_entry_set_slab;
 static struct kmem_cache *inmem_entry_slab;
 
+static unsigned long __reverse_ulong(unsigned char *str)
+{
+	unsigned long tmp = 0;
+	int shift = 24, idx = 0;
+
+#if BITS_PER_LONG == 64
+	shift = 56;
+#endif
+	while (shift >= 0) {
+		tmp |= (unsigned long)str[idx++] << shift;
+		shift -= BITS_PER_BYTE;
+	}
+	return tmp;
+}
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 /**
  * Copied from latest lib/llist.c
  * llist_for_each_entry_safe - iterate over some deleted entries of
@@ -87,22 +105,10 @@ struct llist_node *llist_reverse_order(struct llist_node *head)
  */
 #define list_last_entry(ptr, type, member) \
 	list_entry((ptr)->prev, type, member)
+<<<<<<< HEAD
+=======
 
-static unsigned long __reverse_ulong(unsigned char *str)
-{
-	unsigned long tmp = 0;
-	int shift = 24, idx = 0;
-
-#if BITS_PER_LONG == 64
-	shift = 56;
-#endif
-	while (shift >= 0) {
-		tmp |= (unsigned long)str[idx++] << shift;
-		shift -= BITS_PER_BYTE;
-	}
-	return tmp;
-}
-
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 /*
  * __reverse_ffs is copied from include/asm-generic/bitops/__ffs.h since
  * MSB and LSB are reversed in a byte by f2fs_set_bit.
@@ -126,14 +132,26 @@ static inline unsigned long __reverse_ffs(unsigned long word)
 		num += 8;
 	else
 		word >>= 8;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	if ((word & 0xf0) == 0)
 		num += 4;
 	else
 		word >>= 4;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	if ((word & 0xc) == 0)
 		num += 2;
 	else
 		word >>= 2;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	if ((word & 0x2) == 0)
 		num += 1;
 	return num;
@@ -153,6 +171,10 @@ static unsigned long __find_rev_next_bit(const unsigned long *addr,
 	const unsigned long *p = addr + BIT_WORD(offset);
 	unsigned long result = offset & ~(BITS_PER_LONG - 1);
 	unsigned long tmp;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	if (offset >= size)
 		return size;
 
@@ -160,8 +182,10 @@ static unsigned long __find_rev_next_bit(const unsigned long *addr,
 	offset %= BITS_PER_LONG;
 	if (!offset)
 		goto aligned;
+<<<<<<< HEAD
+=======
 
-
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	tmp = __reverse_ulong((unsigned char *)p);
 	tmp &= ~0UL >> offset;
 
@@ -208,6 +232,10 @@ static unsigned long __find_rev_next_zero_bit(const unsigned long *addr,
 	offset %= BITS_PER_LONG;
 	if (!offset)
 		goto aligned;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	tmp = __reverse_ulong((unsigned char *)p);
 	tmp |= ~((~0UL << offset) >> offset);
 
@@ -244,6 +272,10 @@ void register_inmem_page(struct inode *inode, struct page *page)
 {
 	struct f2fs_inode_info *fi = F2FS_I(inode);
 	struct inmem_pages *new;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	f2fs_trace_pid(page);
 
 	set_page_private(page, (unsigned long)ATOMIC_WRITTEN_PAGE);
@@ -254,6 +286,10 @@ void register_inmem_page(struct inode *inode, struct page *page)
 	/* add atomic page indices to the list */
 	new->page = page;
 	INIT_LIST_HEAD(&new->list);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	/* increase reference count with clean state */
 	mutex_lock(&fi->inmem_lock);
 	get_page(page);
@@ -276,7 +312,6 @@ int commit_inmem_pages(struct inode *inode, bool abort)
 		.rw = WRITE_SYNC | REQ_PRIO,
 		.encrypted_page = NULL,
 	};
-
 	int err = 0;
 
 	/*
@@ -293,7 +328,6 @@ int commit_inmem_pages(struct inode *inode, bool abort)
 
 	mutex_lock(&fi->inmem_lock);
 	list_for_each_entry_safe(cur, tmp, &fi->inmem_pages, list) {
-
 		lock_page(cur->page);
 		if (!abort) {
 			if (cur->page->mapping == inode->i_mapping) {
@@ -329,7 +363,6 @@ int commit_inmem_pages(struct inode *inode, bool abort)
 		if (submit_bio)
 			f2fs_submit_merged_bio(sbi, DATA, WRITE);
 	}
-
 	return err;
 }
 
@@ -343,7 +376,11 @@ void f2fs_balance_fs(struct f2fs_sb_info *sbi)
 	 * We should do GC or end up with checkpoint, if there are so many dirty
 	 * dir/node pages without enough free segments.
 	 */
-	if (has_not_enough_free_secs(sbi, 0)){
+<<<<<<< HEAD
+
+=======
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
+	if (has_not_enough_free_secs(sbi, 0)) {
 		mutex_lock(&sbi->gc_mutex);
 		f2fs_gc(sbi, false);
 	}
@@ -352,7 +389,6 @@ void f2fs_balance_fs(struct f2fs_sb_info *sbi)
 void f2fs_balance_fs_bg(struct f2fs_sb_info *sbi)
 {
 	/* try to shrink extent cache when there is no enough memory */
-
 	if (!available_free_memory(sbi, EXTENT_CACHE))
 		f2fs_shrink_extent_tree(sbi, EXTENT_CACHE_SHRINK_NUMBER);
 
@@ -371,6 +407,36 @@ void f2fs_balance_fs_bg(struct f2fs_sb_info *sbi)
 		f2fs_sync_fs(sbi->sb, true);
 }
 
+struct __submit_bio_ret {
+	struct completion event;
+	int error;
+};
+
+static void __submit_bio_wait_endio(struct bio *bio, int error)
+{
+	struct __submit_bio_ret *ret = bio->bi_private;
+
+	ret->error = error;
+	complete(&ret->event);
+}
+
+static int __submit_bio_wait(int rw, struct bio *bio)
+{
+	struct __submit_bio_ret ret;
+
+	rw |= REQ_SYNC;
+	init_completion(&ret.event);
+	bio->bi_private = &ret;
+	bio->bi_end_io = __submit_bio_wait_endio;
+	submit_bio(rw, bio);
+	wait_for_completion(&ret.event);
+
+	return ret.error;
+}
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 static int issue_flush_thread(void *data)
 {
 	struct f2fs_sb_info *sbi = data;
@@ -391,8 +457,11 @@ repeat:
 		fcc->dispatch_list = llist_reverse_order(fcc->dispatch_list);
 
 		bio->bi_bdev = sbi->sb->s_bdev;
-		ret = submit_bio_wait(WRITE_FLUSH, bio);
+		ret = __submit_bio_wait(WRITE_FLUSH, bio);
+<<<<<<< HEAD
+=======
 
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 		llist_for_each_entry_safe(cmd, next,
 					  fcc->dispatch_list, llnode) {
 			cmd->ret = ret;
@@ -423,7 +492,7 @@ int f2fs_issue_flush(struct f2fs_sb_info *sbi)
 		int ret;
 
 		bio->bi_bdev = sbi->sb->s_bdev;
-		ret = submit_bio_wait(WRITE_FLUSH, bio);
+		ret = __submit_bio_wait(WRITE_FLUSH, bio);
 		bio_put(bio);
 		return ret;
 	}
@@ -581,10 +650,13 @@ bool discard_next_dnode(struct f2fs_sb_info *sbi, block_t blkaddr)
 
 		if (f2fs_test_bit(offset, se->discard_map))
 			return false;
+
 		err = f2fs_issue_discard(sbi, blkaddr, 1);
 	}
+<<<<<<< HEAD
+=======
 
-
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	if (err) {
 		update_meta_page(sbi, NULL, blkaddr);
 		return true;
@@ -1498,9 +1570,13 @@ static inline bool is_merged_page(struct f2fs_sb_info *sbi,
 		up_read(&io->io_rwsem);
 		return false;
 	}
+<<<<<<< HEAD
+	__bio_for_each_segment(bvec, io->bio, i, 0) {
+=======
 
-	bio_for_each_segment_all(bvec, io->bio, i) {
+	__bio_for_each_segment(bvec, io->bio, i, 0) {
 
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 		if (bvec->bv_page->mapping) {
 			target = bvec->bv_page;
 		} else {
@@ -1532,7 +1608,6 @@ void f2fs_wait_on_page_writeback(struct page *page,
 			f2fs_submit_merged_bio(sbi, type, WRITE);
 		wait_on_page_writeback(page);
 	}
-
 }
 
 void f2fs_wait_on_encrypted_page_writeback(struct f2fs_sb_info *sbi,
@@ -1689,7 +1764,6 @@ static int restore_curseg_summaries(struct f2fs_sb_info *sbi)
 
 		if (npages >= 2)
 			ra_meta_pages(sbi, start_sum_block(sbi), npages,
-
 							META_CP, true);
 
 		/* restore for compacted data summary */
@@ -1700,7 +1774,6 @@ static int restore_curseg_summaries(struct f2fs_sb_info *sbi)
 
 	if (__exist_node_summaries(sbi))
 		ra_meta_pages(sbi, sum_blk_addr(sbi, NR_CURSEG_TYPE, type),
-
 					NR_CURSEG_TYPE - type, META_CP, true);
 
 	for (; type <= CURSEG_COLD_NODE; type++) {
@@ -1857,9 +1930,12 @@ static struct page *get_next_sit_page(struct f2fs_sb_info *sbi,
 
 static struct sit_entry_set *grab_sit_entry_set(void)
 {
+<<<<<<< HEAD
+	struct sit_entry_set *ses = f2fs_kmem_cache_alloc(sit_entry_set_slab, GFP_NOFS);
+=======
 	struct sit_entry_set *ses =
-
 			f2fs_kmem_cache_alloc(sit_entry_set_slab, GFP_NOFS);
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 
 	ses->entry_cnt = 0;
 	INIT_LIST_HEAD(&ses->set_list);
@@ -2067,7 +2143,6 @@ static int build_sit_info(struct f2fs_sb_info *sbi)
 		return -ENOMEM;
 
 	bitmap_size = f2fs_bitmap_size(MAIN_SEGS(sbi));
-
 	sit_i->dirty_sentries_bitmap = f2fs_kvzalloc(bitmap_size, GFP_KERNEL);
 	if (!sit_i->dirty_sentries_bitmap)
 		return -ENOMEM;
@@ -2090,7 +2165,6 @@ static int build_sit_info(struct f2fs_sb_info *sbi)
 		return -ENOMEM;
 
 	if (sbi->segs_per_sec > 1) {
-
 		sit_i->sec_entries = f2fs_kvzalloc(MAIN_SECS(sbi) *
 					sizeof(struct sec_entry), GFP_KERNEL);
 		if (!sit_i->sec_entries)
@@ -2142,7 +2216,6 @@ static int build_free_segmap(struct f2fs_sb_info *sbi)
 		return -ENOMEM;
 
 	sec_bitmap_size = f2fs_bitmap_size(MAIN_SECS(sbi));
-
 	free_i->free_secmap = f2fs_kvmalloc(sec_bitmap_size, GFP_KERNEL);
 	if (!free_i->free_secmap)
 		return -ENOMEM;
@@ -2192,7 +2265,6 @@ static void build_sit_entries(struct f2fs_sb_info *sbi)
 	int nrpages = MAX_BIO_BLOCKS(sbi);
 
 	do {
-
 		readed = ra_meta_pages(sbi, start_blk, nrpages, META_SIT, true);
 
 		start = start_blk * sit_i->sents_per_block;

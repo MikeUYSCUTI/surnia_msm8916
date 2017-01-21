@@ -450,7 +450,10 @@ TRACE_EVENT(f2fs_truncate_partial_nodes,
 TRACE_EVENT(f2fs_map_blocks,
 	TP_PROTO(struct inode *inode, struct f2fs_map_blocks *map, int ret),
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	TP_ARGS(inode, map, ret),
 
 	TP_STRUCT__entry(
@@ -786,6 +789,10 @@ DEFINE_EVENT_CONDITION(f2fs__submit_bio, f2fs_submit_read_bio,
 );
 
 TRACE_EVENT(f2fs_write_begin,
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	TP_PROTO(struct inode *inode, loff_t pos, unsigned int len,
 				unsigned int flags),
 
@@ -988,7 +995,10 @@ TRACE_EVENT(f2fs_writepages,
 		__entry->tagged_writepages,
 		__entry->for_reclaim,
 		__entry->range_cyclic)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 );
 
 TRACE_EVENT(f2fs_readpages,

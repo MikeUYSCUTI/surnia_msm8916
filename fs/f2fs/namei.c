@@ -9,7 +9,6 @@
  * published by the Free Software Foundation.
  */
 #include <linux/fs.h>
-#include <linux/namei.h>
 #include <linux/f2fs_fs.h>
 #include <linux/pagemap.h>
 #include <linux/sched.h>
@@ -122,7 +121,7 @@ static inline void set_cold_files(struct f2fs_sb_info *sbi, struct inode *inode,
 }
 
 static int f2fs_create(struct inode *dir, struct dentry *dentry, umode_t mode,
-						bool excl)
+		       struct nameidata *nd)
 {
 	struct f2fs_sb_info *sbi = F2FS_I_SB(dir);
 	struct inode *inode;
@@ -199,7 +198,7 @@ out:
 
 struct dentry *f2fs_get_parent(struct dentry *child)
 {
-	struct qstr dotdot = QSTR_INIT("..", 2);
+	struct qstr dotdot = {.len = 2, .name = ".."};
 	unsigned long ino = f2fs_inode_by_name(child->d_inode, &dotdot);
 	if (!ino)
 		return ERR_PTR(-ENOENT);
@@ -226,6 +225,10 @@ static int __recover_dot_dentries(struct inode *dir, nid_t pino)
 		if (err)
 			goto out;
 	}
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	de = f2fs_find_entry(dir, &dotdot, &page);
 	if (de) {
 		f2fs_dentry_kunmap(dir, page);
@@ -244,7 +247,7 @@ out:
 }
 
 static struct dentry *f2fs_lookup(struct inode *dir, struct dentry *dentry,
-		unsigned int flags)
+					struct nameidata *nd)
 {
 	struct inode *inode = NULL;
 	struct f2fs_dir_entry *de;
@@ -254,8 +257,10 @@ static struct dentry *f2fs_lookup(struct inode *dir, struct dentry *dentry,
 
 	if (dentry->d_name.len > F2FS_NAME_LEN)
 		return ERR_PTR(-ENAMETOOLONG);
+<<<<<<< HEAD
+=======
 
-
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	de = f2fs_find_entry(dir, &dentry->d_name, &page);
 	if (!de)
 		return d_splice_alias(inode, dentry);

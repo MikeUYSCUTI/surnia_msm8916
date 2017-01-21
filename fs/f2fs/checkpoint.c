@@ -364,7 +364,6 @@ const struct address_space_operations f2fs_meta_aops = {
 static void __add_ino_entry(struct f2fs_sb_info *sbi, nid_t ino, int type)
 {
 	struct inode_management *im = &sbi->im[type];
-
 	struct ino_entry *e, *tmp;
 
 	tmp = f2fs_kmem_cache_alloc(ino_entry_slab, GFP_NOFS);
@@ -389,6 +388,7 @@ retry:
 	}
 	spin_unlock(&im->ino_lock);
 	radix_tree_preload_end();
+
 	if (e != tmp)
 		kmem_cache_free(ino_entry_slab, tmp);
 }
@@ -512,21 +512,20 @@ static int recover_orphan_inode(struct f2fs_sb_info *sbi, nid_t ino)
 	return 0;
 }
 
- recover_orphan_inodes(struct f2fs_sb_info *sbi)
+int recover_orphan_inodes(struct f2fs_sb_info *sbi)
 {
 	block_t start_blk, orphan_blocks, i, j;
 	int err;
 
 	if (!is_set_ckpt_flags(F2FS_CKPT(sbi), CP_ORPHAN_PRESENT_FLAG))
-		return;
-
-	set_sbi_flag(sbi, SBI_POR_DOING);
+		return 0;
 
 	start_blk = __start_cp_addr(sbi) + 1 + __cp_payload(sbi);
 	orphan_blocks = __start_sum_addr(sbi) - 1 - __cp_payload(sbi);
-	start_blk = __start_cp_addr(sbi) + 1 + __cp_payload(sbi);
-	orphan_blocks = __start_sum_addr(sbi) - 1 - __cp_payload(sbi);
+<<<<<<< HEAD
+=======
 
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	ra_meta_pages(sbi, start_blk, orphan_blocks, META_CP, true);
 
 	for (i = 0; i < orphan_blocks; i++) {
@@ -546,7 +545,10 @@ static int recover_orphan_inode(struct f2fs_sb_info *sbi, nid_t ino)
 	}
 	/* clear Orphan Flag */
 	clear_ckpt_flags(F2FS_CKPT(sbi), CP_ORPHAN_PRESENT_FLAG);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	return 0;
 }
 
@@ -555,13 +557,14 @@ static void write_orphan_inodes(struct f2fs_sb_info *sbi, block_t start_blk)
 	struct list_head *head;
 	struct f2fs_orphan_block *orphan_blk = NULL;
 	unsigned int nentries = 0;
-	unsigned short index;
+	unsigned short index = 1;
 	unsigned short orphan_blocks;
 	struct page *page = NULL;
 	struct ino_entry *orphan = NULL;
 	struct inode_management *im = &sbi->im[ORPHAN_INO];
 
 	orphan_blocks = GET_ORPHAN_BLOCKS(im->ino_num);
+
 	/*
 	 * we don't need to do spin_lock(&im->ino_lock) here, since all the
 	 * orphan inode operations are covered under f2fs_lock_op().
@@ -746,6 +749,7 @@ void update_dirty_page(struct inode *inode, struct page *page)
 	struct f2fs_sb_info *sbi = F2FS_I_SB(inode);
 	struct inode_entry *new;
 	int ret = 0;
+
 	if (!S_ISDIR(inode->i_mode) && !S_ISREG(inode->i_mode) &&
 			!S_ISLNK(inode->i_mode))
 		return;
@@ -1059,9 +1063,11 @@ static void do_checkpoint(struct f2fs_sb_info *sbi, struct cp_control *cpc)
 	update_meta_page(sbi, ckpt, start_blk);
 
 	/* wait for previous submitted node/meta pages writeback */
+	wait_on_all_pages_writeback(sbi);
 
 	if (unlikely(f2fs_cp_error(sbi)))
 		return;
+
 	filemap_fdatawait_range(NODE_MAPPING(sbi), 0, LONG_MAX);
 	filemap_fdatawait_range(META_MAPPING(sbi), 0, LONG_MAX);
 
@@ -1074,7 +1080,12 @@ static void do_checkpoint(struct f2fs_sb_info *sbi, struct cp_control *cpc)
 
 	/* wait for previous submitted meta pages writeback */
 	wait_on_all_pages_writeback(sbi);
-    /*
+
+<<<<<<< HEAD
+
+=======
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
+	/*
 	 * invalidate meta page which is used temporarily for zeroing out
 	 * block at the end of warm node chain.
 	 */
@@ -1109,6 +1120,7 @@ void write_checkpoint(struct f2fs_sb_info *sbi, struct cp_control *cpc)
 		goto out;
 	if (f2fs_readonly(sbi->sb))
 		goto out;
+
 	trace_f2fs_write_checkpoint(sbi->sb, cpc->reason, "start block_ops");
 
 	if (block_operations(sbi))

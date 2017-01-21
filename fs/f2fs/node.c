@@ -245,6 +245,10 @@ bool need_inode_block_update(struct f2fs_sb_info *sbi, nid_t ino)
 static struct nat_entry *grab_nat_entry(struct f2fs_nm_info *nm_i, nid_t nid)
 {
 	struct nat_entry *new;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	new = f2fs_kmem_cache_alloc(nat_entry_slab, GFP_NOFS);
 	f2fs_radix_tree_insert(&nm_i->nat_root, nid, new);
 	memset(new, 0, sizeof(struct nat_entry));
@@ -332,6 +336,10 @@ int try_to_free_nats(struct f2fs_sb_info *sbi, int nr_shrink)
 {
 	struct f2fs_nm_info *nm_i = NM_I(sbi);
 	int nr = nr_shrink;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	if (!down_write_trylock(&nm_i->nat_tree_lock))
 		return 0;
 
@@ -343,7 +351,6 @@ int try_to_free_nats(struct f2fs_sb_info *sbi, int nr_shrink)
 		nr_shrink--;
 	}
 	up_write(&nm_i->nat_tree_lock);
-
 	return nr - nr_shrink;
 }
 
@@ -907,7 +914,6 @@ int remove_inode_page(struct inode *inode)
 	int err;
 
 	set_new_dnode(&dn, inode, NULL, NULL, inode->i_ino);
-
 	err = get_dnode_of_data(&dn, 0, LOOKUP_NODE);
 	if (err)
 		return err;
@@ -929,6 +935,7 @@ int remove_inode_page(struct inode *inode)
 
 	/* will put inode & node pages */
 	truncate_node(&dn);
+	return 0;
 }
 
 struct page *new_inode_page(struct inode *inode)
@@ -1016,7 +1023,6 @@ static int read_node_page(struct page *page, int rw)
 
 	if (unlikely(ni.blk_addr == NULL_ADDR)) {
 		ClearPageUptodate(page);
-
 		return -ENOENT;
 	}
 
@@ -1047,7 +1053,6 @@ void ra_node_page(struct f2fs_sb_info *sbi, nid_t nid)
 		return;
 
 	err = read_node_page(apage, READA);
-
 	f2fs_put_page(apage, err ? 1 : 0);
 }
 
@@ -1064,7 +1069,6 @@ repeat:
 	if (err < 0) {
 		f2fs_put_page(page, 1);
 		return ERR_PTR(err);
-
 	} else if (err != LOCKED_PAGE) {
 		lock_page(page);
 	}
@@ -1531,6 +1535,11 @@ static void build_free_nids(struct f2fs_sb_info *sbi)
 	/* Enough entries */
 	if (nm_i->fcnt > NAT_ENTRY_PER_BLOCK)
 		return;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
+	/* readahead nat pages to be scanned */
 	ra_meta_pages(sbi, NAT_BLOCK_OFFSET(nid), FREE_NID_PAGES,
 							META_NAT, true);
 
@@ -1584,7 +1593,6 @@ retry:
 
 	/* We should not use stale free nids created by build_free_nids */
 	if (nm_i->fcnt && !on_build_free_nids(nm_i)) {
-
 		struct node_info ni;
 
 		f2fs_bug_on(sbi, list_empty(&nm_i->free_nid_list));
@@ -1659,7 +1667,6 @@ void alloc_nid_failed(struct f2fs_sb_info *sbi, nid_t nid)
 	if (need_free)
 		kmem_cache_free(free_nid_slab, i);
 }
-
 
 int try_to_free_nids(struct f2fs_sb_info *sbi, int nr_shrink)
 {
@@ -1812,7 +1819,6 @@ int restore_node_summary(struct f2fs_sb_info *sbi,
 		nrpages = min(last_offset - i, bio_blocks);
 
 		/* readahead node pages */
-
 		ra_meta_pages(sbi, addr, nrpages, META_POR, true);
 
 		for (idx = addr; idx < addr + nrpages; idx++) {
@@ -2010,7 +2016,6 @@ static int init_node_manager(struct f2fs_sb_info *sbi)
 	nm_i->fcnt = 0;
 	nm_i->nat_cnt = 0;
 	nm_i->ram_thresh = DEF_RAM_THRESHOLD;
-
 	nm_i->ra_nid_pages = DEF_RA_NID_PAGES;
 
 	INIT_RADIX_TREE(&nm_i->free_nid_root, GFP_ATOMIC);

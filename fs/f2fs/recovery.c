@@ -179,8 +179,10 @@ static int find_fsync_dnodes(struct f2fs_sb_info *sbi, struct list_head *head)
 	/* get node pages in the current segment */
 	curseg = CURSEG_I(sbi, CURSEG_WARM_NODE);
 	blkaddr = NEXT_FREE_BLKADDR(sbi, curseg);
+<<<<<<< HEAD
+=======
 
-
+>>>>>>> 3551ed6e46e5... f2fs: catch up to v4.4-rc1
 	ra_meta_pages(sbi, blkaddr, 1, META_POR, true);
 
 	while (1) {
@@ -384,11 +386,9 @@ static int do_recover_data(struct f2fs_sb_info *sbi, struct inode *inode,
 	start = start_bidx_of_node(ofs_of_node(page), fi);
 	end = start + ADDRS_PER_PAGE(page, fi);
 
-
 	set_new_dnode(&dn, inode, NULL, NULL, 0);
 
 	err = get_dnode_of_data(&dn, start, ALLOC_NODE);
-
 	if (err)
 		goto out;
 
@@ -549,13 +549,6 @@ int recover_fsync_data(struct f2fs_sb_info *sbi)
 	blkaddr = NEXT_FREE_BLKADDR(sbi, curseg);
 
 	/* step #1: find fsynced inode numbers */
-	set_sbi_flag(sbi, SBI_POR_DOING);
-
-	/* prevent checkpoint */
-	mutex_lock(&sbi->cp_mutex);
-
-	blkaddr = NEXT_FREE_BLKADDR(sbi, curseg);
-
 	err = find_fsync_dnodes(sbi, &inode_list);
 	if (err)
 		goto out;
@@ -575,7 +568,7 @@ out:
 
 	/* truncate meta pages to be used by the recovery */
 	truncate_inode_pages_range(META_MAPPING(sbi),
-	(loff_t)MAIN_BLKADDR(sbi) << PAGE_CACHE_SHIFT, -1);
+			(loff_t)MAIN_BLKADDR(sbi) << PAGE_CACHE_SHIFT, -1);
 
 	if (err) {
 		truncate_inode_pages(NODE_MAPPING(sbi), 0);

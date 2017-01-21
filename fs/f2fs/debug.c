@@ -118,7 +118,6 @@ static void update_sit_info(struct f2fs_sb_info *sbi)
 		}
 	}
 	dist = div_u64(MAIN_SECS(sbi) * hblks_per_sec * hblks_per_sec, 100);
-
 	si->bimodal = div64_u64(bimodal, dist);
 	if (si->dirty_count)
 		si->avg_vblocks = div_u64(total_vblocks, ndirty);
@@ -199,7 +198,6 @@ get_cache:
 
 	si->page_mem = 0;
 	npages = NODE_MAPPING(sbi)->nrpages;
-
 	si->page_mem += (unsigned long long)npages << PAGE_CACHE_SHIFT;
 	npages = META_MAPPING(sbi)->nrpages;
 	si->page_mem += (unsigned long long)npages << PAGE_CACHE_SHIFT;
