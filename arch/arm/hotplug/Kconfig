@@ -22,6 +22,12 @@ config MSM_SLEEPER
  	help
  	  CPU hotplug driver
 
+config INTELLI_PLUG
+ 	bool "Hotplug for Razor Reborn"
+ 	depends on MSM_RUN_QUEUE_STATS
+ 	default y
+ 	help
+ 	  This enables kernel based multi core control.
 
 config ASMP
  bool "Multi-core automatic hotplug support"
@@ -30,6 +36,15 @@ config ASMP
  help
    Automatically hotplugs the multiple cpu cores on and off based on cpu load and suspend state
 
+config THUNDERPLUG_OCTA_CONTROL
+ 	bool "Enable plugging down/up of cores using powersuspend"
+ 	help
+ 	  This driver uses powersuspend to take down the cpu cores on a octa core device.
+
+config THUNDERPLUG_QUAD_CONTROL
+ 	bool "Enable plugging down/up of cores with/without using LCD NOTIFIER"
+ 	help
+ 	  This driver doesn't uses LCD NOTIFIER to take down the cpu cores on a device Instead uses simple calculations which are tuned to sit perfectly on a quad core device :).
 
 config MAKO_HOTPLUG
  	bool "Mako Hotplug"
