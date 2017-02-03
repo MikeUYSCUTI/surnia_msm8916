@@ -9,3 +9,9 @@ config CLUSTER_PLUG
           This hotplug implementation always keeps the big cluster
           online, and only activates the little cluster for heavy
           parallel loads.
+
+config INTELLI_PLUG
+	    bool "Enable intelli-plug cpu hotplug driver"
+	    default n
+	    help
+	         Generic Intelli-plug cpu hotplug driver for ARM SOCs
