@@ -15,3 +15,9 @@ config INTELLI_PLUG
 	    default n
 	    help
 	         Generic Intelli-plug cpu hotplug driver for ARM SOCs
+
+config MSM_SLEEPER
+ 	bool "CPU hotplug driver"
+ 	default y
+ 	help
+ 	  CPU hotplug driver
