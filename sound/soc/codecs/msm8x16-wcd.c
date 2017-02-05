@@ -4185,7 +4185,7 @@ static void msm8x16_wcd_configure_cap(struct snd_soc_codec *codec,
 
 
 #ifdef CONFIG_SOUND_CONTROL
-static struct snd_soc_codec *sound_control_codec_ptr;
+struct snd_soc_codec *sound_control_codec_ptr;
 
 static ssize_t headphone_gain_show(struct kobject *kobj,
 		struct kobj_attribute *attr, char *buf)
@@ -4216,31 +4216,46 @@ static ssize_t headphone_gain_store(struct kobject *kobj,
 	return count;
 }
 
+static ssize_t headphone_gain_show_2(struct kobject *kobj,
+		struct kobj_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d %d\n",
+		snd_soc_read(sound_control_codec_ptr, MSM8X16_WCD_A_CDC_RX2_VOL_CTL_B2_CTL));
+}
+
+static ssize_t headphone_gain_store_2(struct kobject *kobj,
+		struct kobj_attribute *attr, const char *buf, size_t count)
+{
+
+	int input_l, input_r;
+
+	sscanf(buf, "%d %d", &input_l, &input_r);
+
+	if (input_l < -10 || input_l > 20)
+		input_l = 0;
+
+	if (input_r < -10 || input_r > 20)
+		input_r = 0;
+
+	snd_soc_write(sound_control_codec_ptr, MSM8X16_WCD_A_CDC_RX1_VOL_CTL_B2_CTL, input_l);
+	snd_soc_write(sound_control_codec_ptr, MSM8X16_WCD_A_CDC_RX2_VOL_CTL_B2_CTL, input_r);
+
+	return count;
+}
+
 static struct kobj_attribute headphone_gain_attribute =
 	__ATTR(headphone_gain, 0664,
 		headphone_gain_show,
-		headphone_gain_store);
+		headphone_gain_show2,
+		headphone_gain_store,
+		headphone_gain_store_2);
 
-static struct attribute *sound_control_attrs[] = {
-		&headphone_gain_attribute.attr,
-		NULL,
-};
-
-static struct attribute_group sound_control_attr_group = {
-		.attrs = sound_control_attrs,
-};
-
-static struct kobject *sound_control_kobj;
-
-
-
-truct snd_soc_codec *sound_codec_ptr;
 
 static ssize_t speaker_gain_show(struct kobject *kobj,
 		struct kobj_attribute *attr, char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%d\n",
-		snd_soc_read(sound_codec_ptr, MSM8X16_WCD_A_CDC_RX2_VOL_CTL_B2_CTL));
+		snd_soc_read(sound_control_codec_ptr, MSM8X16_WCD_A_CDC_RX3_VOL_CTL_B2_CTL));
 }
 
 static ssize_t speaker_gain_store(struct kobject *kobj,
@@ -4253,7 +4268,8 @@ static ssize_t speaker_gain_store(struct kobject *kobj,
 	if (input < -10 || input > 20)
 		input = 0;
 
-	snd_soc_write(sound_codec_ptr, MSM8X16_WCD_A_CDC_RX2_VOL_CTL_B2_CTL, input);
+	snd_soc_write(sound_control_codec_ptr, MSM8X16_WCD_A_CDC_RX3_VOL_CTL_B2_CTL, input);
+
 
 	return count;
 }
@@ -4265,14 +4281,17 @@ static struct kobj_attribute speaker_gain_attribute =
 
 static struct attribute *sound_control_attrs[] = {
 		&headphone_gain_attribute.attr,
-		&mic_gain_attribute.attr,
 		&speaker_gain_attribute.attr,
 		NULL,
 };
-
+ 
+static struct kobject *sound_control_kobj;
 
 #endif
 
+static struct attribute_group sound_control_attr_group = {
+		.attrs = sound_control_attrs,
+};
 
 static int msm8x16_wcd_codec_probe(struct snd_soc_codec *codec)
 {
@@ -4665,6 +4684,8 @@ static int msm8x16_wcd_device_init(struct msm8x16_wcd *msm8x16)
 	mutex_init(&msm8x16->io_lock);
 	return 0;
 }
+
+
 
 static int msm8x16_wcd_spmi_probe(struct spmi_device *spmi)
 {
