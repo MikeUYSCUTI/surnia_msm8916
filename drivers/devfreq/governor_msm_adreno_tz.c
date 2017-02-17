@@ -224,11 +224,13 @@ if (adreno_idler_active==true)
 	 * Force to use & record as min freq when system has
 	 * entered pm-suspend or screen-off state.
 	 */
+#ifdef CONFIG_POWERSUSPEND
 	if (suspended || power_suspended) 
 	{
 		*freq = devfreq->profile->freq_table[devfreq->profile->max_state - 1];
 		return 0;
 	}
+#endif
 }
 #endif
 
