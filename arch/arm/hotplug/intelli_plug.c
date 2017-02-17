@@ -14,6 +14,7 @@
  *
  */
 #include <linux/workqueue.h>
+#include <linux/devfreq.h>
 #include <linux/cpu.h>
 #include <linux/sched.h>
 #include <linux/mutex.h>
@@ -76,7 +77,17 @@ struct ip_cpu_info {
 
 static DEFINE_PER_CPU(struct ip_cpu_info, ip_info);
 
-static unsigned int screen_off_max = UINT_MAX;
+static int max_freq_info(struct devfreq *df)
+{
+	if (!df->max_freq)
+	 return UINT_MAX;
+	else
+	 return df->max_freq;
+
+}
+
+static unsigned int screen_off_max = max_freq_info;
+
 module_param(screen_off_max, uint, 0664);
 
 #define CAPACITY_RESERVE	50
@@ -87,7 +98,7 @@ module_param(screen_off_max, uint, 0664);
 defined(CONFIG_ARCH_MSM8974)
 #define THREAD_CAPACITY	(339 - CAPACITY_RESERVE)
 #elif defined(CONFIG_ARCH_MSM8226) || defined (CONFIG_ARCH_MSM8926) || \
-defined (CONFIG_ARCH_MSM8610) || defined (CONFIG_ARCH_MSM8228)
+defined (CONFIG_ARCH_MSM8610) || defined (CONFIG_ARCH_MSM8916)
 #define THREAD_CAPACITY (190 - CAPACITY_RESERVE)
 #else
 #define THREAD_CAPACITY	(250 - CAPACITY_RESERVE)
